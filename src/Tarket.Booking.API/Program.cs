@@ -1,38 +1,35 @@
-using Microsoft.EntityFrameworkCore;
-using Tarker.Booking.Application.Interfaces;
-using Tarker.Booking.Persistence.DataBase;
+using Microsoft.VisualBasic;
+using Tarker.Booking.Application;
+using Tarker.Booking.Application.DataBase.User.Commands.CreateUser;
+using Tarker.Booking.Application.DataBase.User.Commands.UpdateUser;
+using Tarker.Booking.Application.DataBase.User.Commands.UpdateUserPassword;
+using Tarker.Booking.Common;
+using Tarker.Booking.External;
+using Tarker.Booking.Persistence;
+using Tarket.Booking.API;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container.
-builder.Services.AddDbContext<DataBaseService>(options =>
-options.UseSqlServer(builder.Configuration["SQLConnectionString"]));
+// Add dependencies injection services
+builder.Services
+    .AddWebApi()
+    .AddCommon()
+    .AddAplication()
+    .AddExternal(builder.Configuration)
+    .AddPersistence(builder.Configuration);
 
-builder.Services.AddScoped<IDataBaseService, DataBaseService>();
 
 var app = builder.Build();
 
-//API Minimalist for test
-app.MapPost("/createTest", async (IDataBaseService _dataBaseService) =>
+app.MapPost("/testService", async (IUpdateUserPasswordCommand service) =>
 {
-    var entity = new Tarker.Booking.Domain.Entities.User.UserEntity
+    var model = new UpdateUserPasswordModel
     {
-        FirstName = "NameTest",
-        LastName = "Tafur",
-        UserName = "User01",
-        Password = "123456"
-     };
+        UserId = 1,
+        Password = "Password3"
+    };
 
-    await _dataBaseService.User.AddAsync(entity);
-    await _dataBaseService.SaveAsync();
-
-    return "User Created!";
-});
-
-app.MapGet("/testGet", async (IDataBaseService _dataBaseService) =>
-{
-    var users = await _dataBaseService.User.ToListAsync();
-    return users;
+    return await service.Execute(model);
 });
 
 app.Run();
