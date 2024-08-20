@@ -1,8 +1,4 @@
-using Microsoft.VisualBasic;
 using Tarker.Booking.Application;
-using Tarker.Booking.Application.DataBase.User.Commands.CreateUser;
-using Tarker.Booking.Application.DataBase.User.Commands.UpdateUser;
-using Tarker.Booking.Application.DataBase.User.Commands.UpdateUserPassword;
 using Tarker.Booking.Common;
 using Tarker.Booking.External;
 using Tarker.Booking.Persistence;
@@ -18,19 +14,11 @@ builder.Services
     .AddExternal(builder.Configuration)
     .AddPersistence(builder.Configuration);
 
+// Add services to the container.
+builder.Services.AddControllers();
 
 var app = builder.Build();
 
-app.MapPost("/testService", async (IUpdateUserPasswordCommand service) =>
-{
-    var model = new UpdateUserPasswordModel
-    {
-        UserId = 1,
-        Password = "Password3"
-    };
-
-    return await service.Execute(model);
-});
-
+app.MapControllers();
 app.Run();
 
