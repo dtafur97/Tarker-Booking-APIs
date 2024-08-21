@@ -1,9 +1,12 @@
-﻿using Microsoft.AspNetCore.Authentication.JwtBearer;
+﻿using Microsoft.ApplicationInsights.AspNetCore.Extensions;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
+using Tarker.Booking.Application.External.ApplicationInsights;
 using Tarker.Booking.Application.External.GetTokenJwt;
+using Tarker.Booking.External.AplicationInsights;
 using Tarker.Booking.External.GetTokenJwt;
 
 namespace Tarker.Booking.External
@@ -27,6 +30,13 @@ namespace Tarker.Booking.External
                     ValidAudience = configuration["AudienceJwt"]
                 };
             });
+
+            services.AddApplicationInsightsTelemetry(new ApplicationInsightsServiceOptions
+            {
+                ConnectionString = configuration["ApplicationInsightsConnectionString"]
+            });
+
+            services.AddSingleton<IInsertAplicationInsightsService, InsertAplicationInsightsService>();
 
             return services;
         }

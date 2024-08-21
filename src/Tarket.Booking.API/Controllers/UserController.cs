@@ -9,17 +9,27 @@ using Tarker.Booking.Application.DataBase.User.Queries.GetAllUser;
 using Tarker.Booking.Application.DataBase.User.Queries.GetUserById;
 using Tarker.Booking.Application.DataBase.User.Queries.GetUserByUsernameAndPassword;
 using Tarker.Booking.Application.Exceptions;
+using Tarker.Booking.Application.External.ApplicationInsights;
 using Tarker.Booking.Application.External.GetTokenJwt;
 using Tarker.Booking.Application.Features;
+using Tarker.Booking.Common.Constants;
+using Tarker.Booking.Domain.Models.ApplicationInsights;
 
 namespace Tarket.Booking.API.Controllers
 {
+#pragma warning disable CS1591 // Missing XML comment for publicly visible type or member
     [Authorize]
     [Route("api/v1/user")]
     [ApiController]
     [TypeFilter(typeof(ExceptionManager))]
     public class UserController : ControllerBase
     {
+        private readonly IInsertAplicationInsightsService _insertAplicationInsightsService;
+
+        public UserController(IInsertAplicationInsightsService insertAplicationInsightsService)
+        {
+            _insertAplicationInsightsService = insertAplicationInsightsService;
+        }
 
         [HttpPost("create")]
         public async Task<IActionResult> Create([FromBody] CreateUserModel model, [FromServices] ICreateUserCommand createUserCommand,
@@ -80,6 +90,14 @@ namespace Tarket.Booking.API.Controllers
         [HttpGet("get-all")]
         public async Task<IActionResult> GetAll([FromServices] IGetAllUserQuery getAllUserQuery)
         {
+
+            var metric = new InsertApplicationInsightsModel(
+                ApplicationInsightsConstants.METRIC_TYPE_API_CALL,
+                EntitiesConstants.USER,
+                "get-all");
+
+            _insertAplicationInsightsService.Execute(metric);
+
             var data = await getAllUserQuery.Execute();
 
             if (data.Count == 0)
@@ -91,6 +109,12 @@ namespace Tarket.Booking.API.Controllers
         [HttpGet("get-by-id/{userId}")]
         public async Task<IActionResult> GetById(int userId, [FromServices] IGetUserByIdQuery getUserByIdQuery)
         {
+            var metric = new InsertApplicationInsightsModel(
+                ApplicationInsightsConstants.METRIC_TYPE_API_CALL,
+                EntitiesConstants.USER,
+                "get-by-id");
+
+            _insertAplicationInsightsService.Execute(metric);
 
             if (userId == 0)
                 return StatusCode(StatusCodes.Status400BadRequest, ResponseApiService.Response(StatusCodes.Status400BadRequest));
@@ -109,6 +133,12 @@ namespace Tarket.Booking.API.Controllers
             [FromServices] IValidator<(string, string)> validator,
             [FromServices] IGetTokenJwtService getTokenJwtService)
         {
+            var metric = new InsertApplicationInsightsModel(
+                ApplicationInsightsConstants.METRIC_TYPE_API_CALL,
+                EntitiesConstants.USER,
+                "get-by-username-password");
+
+            _insertAplicationInsightsService.Execute(metric);
 
             var validate = await validator.ValidateAsync((userName, password));
 
