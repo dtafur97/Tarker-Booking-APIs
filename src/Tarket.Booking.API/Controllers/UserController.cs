@@ -1,6 +1,6 @@
 ﻿using FluentValidation;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using System.ComponentModel.DataAnnotations;
 using Tarker.Booking.Application.DataBase.User.Commands.CreateUser;
 using Tarker.Booking.Application.DataBase.User.Commands.DeleteUser;
 using Tarker.Booking.Application.DataBase.User.Commands.UpdateUser;
@@ -9,10 +9,12 @@ using Tarker.Booking.Application.DataBase.User.Queries.GetAllUser;
 using Tarker.Booking.Application.DataBase.User.Queries.GetUserById;
 using Tarker.Booking.Application.DataBase.User.Queries.GetUserByUsernameAndPassword;
 using Tarker.Booking.Application.Exceptions;
+using Tarker.Booking.Application.External.GetTokenJwt;
 using Tarker.Booking.Application.Features;
 
 namespace Tarket.Booking.API.Controllers
 {
+    [Authorize]
     [Route("api/v1/user")]
     [ApiController]
     [TypeFilter(typeof(ExceptionManager))]
@@ -77,33 +79,35 @@ namespace Tarket.Booking.API.Controllers
 
         [HttpGet("get-all")]
         public async Task<IActionResult> GetAll([FromServices] IGetAllUserQuery getAllUserQuery)
-        { 
+        {
             var data = await getAllUserQuery.Execute();
 
-            if(data == null || data.Count == 0)
+            if (data.Count == 0)
                 return StatusCode(StatusCodes.Status404NotFound, ResponseApiService.Response(StatusCodes.Status404NotFound));
 
             return StatusCode(StatusCodes.Status200OK, ResponseApiService.Response(StatusCodes.Status200OK, data));
         }
 
         [HttpGet("get-by-id/{userId}")]
-        public async Task<IActionResult> GetById(int  userId, [FromServices] IGetUserByIdQuery getUserByIdQuery) 
+        public async Task<IActionResult> GetById(int userId, [FromServices] IGetUserByIdQuery getUserByIdQuery)
         {
 
-            if(userId == 0)
+            if (userId == 0)
                 return StatusCode(StatusCodes.Status400BadRequest, ResponseApiService.Response(StatusCodes.Status400BadRequest));
 
             var data = await getUserByIdQuery.Execute(userId);
 
-            if(data == null)
+            if (data == null)
                 return StatusCode(StatusCodes.Status404NotFound, ResponseApiService.Response(StatusCodes.Status404NotFound));
 
             return StatusCode(StatusCodes.Status200OK, ResponseApiService.Response(StatusCodes.Status200OK, data));
         }
 
+        [AllowAnonymous]
         [HttpGet("get-by-username-password/{userName}/{password}")]
         public async Task<IActionResult> GetByUsernamePassword(string userName, string password, [FromServices] IGetUserByUsernameAndPasswordQuery getUserByUsernameAndPasswordQuery,
-            [FromServices] IValidator<(string, string)> validator)
+            [FromServices] IValidator<(string, string)> validator,
+            [FromServices] IGetTokenJwtService getTokenJwtService)
         {
 
             var validate = await validator.ValidateAsync((userName, password));
@@ -113,8 +117,10 @@ namespace Tarket.Booking.API.Controllers
 
             var data = await getUserByUsernameAndPasswordQuery.Execute(userName, password);
 
-            if(data == null)
+            if (data == null)
                 return StatusCode(StatusCodes.Status404NotFound, ResponseApiService.Response(StatusCodes.Status404NotFound));
+
+            data.Token = getTokenJwtService.Execute(data.UserId.ToString());
 
             return StatusCode(StatusCodes.Status200OK, ResponseApiService.Response(StatusCodes.Status200OK, data));
         }

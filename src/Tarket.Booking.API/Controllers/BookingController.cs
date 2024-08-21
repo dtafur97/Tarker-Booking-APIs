@@ -33,7 +33,7 @@ namespace Tarket.Booking.API.Controllers
         {
             var data = await getAllBookingQuery.Execute();
 
-            if (data == null || data.Count == 0)
+            if (data.Count == 0)
                 return StatusCode(StatusCodes.Status404NotFound, ResponseApiService.Response(StatusCodes.Status404NotFound));
 
             return StatusCode(StatusCodes.Status200OK, ResponseApiService.Response(StatusCodes.Status200OK, data));

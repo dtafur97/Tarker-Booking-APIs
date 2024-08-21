@@ -1,6 +1,5 @@
 ﻿using FluentValidation;
 using Microsoft.AspNetCore.Mvc;
-using System.ComponentModel.DataAnnotations;
 using Tarker.Booking.Application.DataBase.Customer.Commands.CreateCustomer;
 using Tarker.Booking.Application.DataBase.Customer.Commands.DeleteCustomer;
 using Tarker.Booking.Application.DataBase.Customer.Commands.UpdateCustomer;
@@ -23,7 +22,7 @@ namespace Tarket.Booking.API.Controllers
         {
             var validate = await validator.ValidateAsync(createCustomerModel);
 
-            if(!validate.IsValid)
+            if (!validate.IsValid)
                 return StatusCode(StatusCodes.Status400BadRequest, ResponseApiService.Response(StatusCodes.Status400BadRequest, validate.Errors.Select(x => x.ErrorMessage).ToList()));
 
             var data = await createCustomerCommand.Execute(createCustomerModel);
@@ -64,7 +63,7 @@ namespace Tarket.Booking.API.Controllers
         {
             var data = await getAllCustomerQuery.Execute();
 
-            if(data == null || data.Count == 0)
+            if (data == null || data.Count == 0)
                 return StatusCode(StatusCodes.Status404NotFound, ResponseApiService.Response(StatusCodes.Status404NotFound));
 
             return StatusCode(StatusCodes.Status200OK, ResponseApiService.Response(StatusCodes.Status200OK, data));
