@@ -1,4 +1,6 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using FluentValidation;
+using Microsoft.AspNetCore.Mvc;
+using System.ComponentModel.DataAnnotations;
 using Tarker.Booking.Application.DataBase.User.Commands.CreateUser;
 using Tarker.Booking.Application.DataBase.User.Commands.DeleteUser;
 using Tarker.Booking.Application.DataBase.User.Commands.UpdateUser;
@@ -18,24 +20,42 @@ namespace Tarket.Booking.API.Controllers
     {
 
         [HttpPost("create")]
-        public async Task<IActionResult> Create([FromBody] CreateUserModel model, [FromServices] ICreateUserCommand createUserCommand)
+        public async Task<IActionResult> Create([FromBody] CreateUserModel model, [FromServices] ICreateUserCommand createUserCommand,
+            [FromServices] IValidator<CreateUserModel> validator)
         {
+            var validate = await validator.ValidateAsync(model);
+
+            if (!validate.IsValid)
+                return StatusCode(StatusCodes.Status400BadRequest, ResponseApiService.Response(StatusCodes.Status400BadRequest, validate.Errors.Select(x => x.ErrorMessage).ToList()));
+
             var data = await createUserCommand.Execute(model);
 
             return StatusCode(StatusCodes.Status201Created, ResponseApiService.Response(StatusCodes.Status201Created, data));
         }
 
         [HttpPut("update")]
-        public async Task<IActionResult> Update([FromBody] UpdateUserModel model, [FromServices] IUpdateUserCommand updateUserCommand)
+        public async Task<IActionResult> Update([FromBody] UpdateUserModel model, [FromServices] IUpdateUserCommand updateUserCommand,
+            [FromServices] IValidator<UpdateUserModel> validator)
         {
+            var validate = await validator.ValidateAsync(model);
+
+            if (!validate.IsValid)
+                return StatusCode(StatusCodes.Status400BadRequest, ResponseApiService.Response(StatusCodes.Status400BadRequest, validate.Errors.Select(x => x.ErrorMessage).ToList()));
+
             var data = await updateUserCommand.Execute(model);
 
             return StatusCode(StatusCodes.Status200OK, ResponseApiService.Response(StatusCodes.Status200OK, data));
         }
 
         [HttpPut("update-password")]
-        public async Task<IActionResult> UpdatePassword([FromBody] UpdateUserPasswordModel model, [FromServices] IUpdateUserPasswordCommand updateUserPasswordCommand)
+        public async Task<IActionResult> UpdatePassword([FromBody] UpdateUserPasswordModel model, [FromServices] IUpdateUserPasswordCommand updateUserPasswordCommand,
+            [FromServices] IValidator<UpdateUserPasswordModel> validator)
         {
+            var validate = await validator.ValidateAsync(model);
+
+            if (!validate.IsValid)
+                return StatusCode(StatusCodes.Status400BadRequest, ResponseApiService.Response(StatusCodes.Status400BadRequest, validate.Errors.Select(x => x.ErrorMessage).ToList()));
+
             var data = await updateUserPasswordCommand.Execute(model);
 
             return StatusCode(StatusCodes.Status200OK, ResponseApiService.Response(StatusCodes.Status200OK, data));
@@ -82,8 +102,14 @@ namespace Tarket.Booking.API.Controllers
         }
 
         [HttpGet("get-by-username-password/{userName}/{password}")]
-        public async Task<IActionResult> GetByUsernamePassword(string userName, string password, [FromServices] IGetUserByUsernameAndPasswordQuery getUserByUsernameAndPasswordQuery)
-        { 
+        public async Task<IActionResult> GetByUsernamePassword(string userName, string password, [FromServices] IGetUserByUsernameAndPasswordQuery getUserByUsernameAndPasswordQuery,
+            [FromServices] IValidator<(string, string)> validator)
+        {
+
+            var validate = await validator.ValidateAsync((userName, password));
+
+            if (!validate.IsValid)
+                return StatusCode(StatusCodes.Status400BadRequest, ResponseApiService.Response(StatusCodes.Status400BadRequest, validate.Errors.Select(x => x.ErrorMessage).ToList()));
 
             var data = await getUserByUsernameAndPasswordQuery.Execute(userName, password);
 

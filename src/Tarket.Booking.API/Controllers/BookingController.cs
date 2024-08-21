@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using FluentValidation;
+using Microsoft.AspNetCore.Mvc;
 using Tarker.Booking.Application.DataBase.Booking.Commands.CreateBooking;
 using Tarker.Booking.Application.DataBase.Booking.Queries.GetAllBookings;
 using Tarker.Booking.Application.DataBase.Booking.Queries.GetBookingsByDocumentNumber;
@@ -14,8 +15,14 @@ namespace Tarket.Booking.API.Controllers
     public class BookingController : ControllerBase
     {
         [HttpPost("create")]
-        public async Task<IActionResult> Create([FromBody] CreateBookingModel createBookingModel, [FromServices] ICreateBookingCommand createBookingCommand)
+        public async Task<IActionResult> Create([FromBody] CreateBookingModel createBookingModel, [FromServices] ICreateBookingCommand createBookingCommand,
+            [FromServices] IValidator<CreateBookingModel> validator)
         {
+            var validate = await validator.ValidateAsync(createBookingModel);
+
+            if (!validate.IsValid)
+                return StatusCode(StatusCodes.Status400BadRequest, ResponseApiService.Response(StatusCodes.Status400BadRequest, validate.Errors.Select(x => x.ErrorMessage).ToList()));
+
             var data = await createBookingCommand.Execute(createBookingModel);
 
             return StatusCode(StatusCodes.Status201Created, ResponseApiService.Response(StatusCodes.Status201Created, data));

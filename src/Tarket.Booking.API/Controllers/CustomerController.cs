@@ -1,4 +1,6 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using FluentValidation;
+using Microsoft.AspNetCore.Mvc;
+using System.ComponentModel.DataAnnotations;
 using Tarker.Booking.Application.DataBase.Customer.Commands.CreateCustomer;
 using Tarker.Booking.Application.DataBase.Customer.Commands.DeleteCustomer;
 using Tarker.Booking.Application.DataBase.Customer.Commands.UpdateCustomer;
@@ -16,16 +18,28 @@ namespace Tarket.Booking.API.Controllers
     public class CustomerController : ControllerBase
     {
         [HttpPost("create")]
-        public async Task<IActionResult> Create([FromBody] CreateCustomerModel createCustomerModel, [FromServices] ICreateCustomerCommand createCustomerCommand)
+        public async Task<IActionResult> Create([FromBody] CreateCustomerModel createCustomerModel, [FromServices] ICreateCustomerCommand createCustomerCommand,
+            [FromServices] IValidator<CreateCustomerModel> validator)
         {
+            var validate = await validator.ValidateAsync(createCustomerModel);
+
+            if(!validate.IsValid)
+                return StatusCode(StatusCodes.Status400BadRequest, ResponseApiService.Response(StatusCodes.Status400BadRequest, validate.Errors.Select(x => x.ErrorMessage).ToList()));
+
             var data = await createCustomerCommand.Execute(createCustomerModel);
 
             return StatusCode(StatusCodes.Status201Created, ResponseApiService.Response(StatusCodes.Status201Created, data));
         }
 
         [HttpPut("update")]
-        public async Task<IActionResult> Update([FromBody] UpdateCustomerModel updateCustomerModel, [FromServices] IUpdateCustomerCommand updateCustomerCommand)
+        public async Task<IActionResult> Update([FromBody] UpdateCustomerModel updateCustomerModel, [FromServices] IUpdateCustomerCommand updateCustomerCommand,
+            [FromServices] IValidator<UpdateCustomerModel> validator)
         {
+            var validate = await validator.ValidateAsync(updateCustomerModel);
+
+            if (!validate.IsValid)
+                return StatusCode(StatusCodes.Status400BadRequest, ResponseApiService.Response(StatusCodes.Status400BadRequest, validate.Errors.Select(x => x.ErrorMessage).ToList()));
+
             var data = await updateCustomerCommand.Execute(updateCustomerModel);
 
             return StatusCode(StatusCodes.Status200OK, ResponseApiService.Response(StatusCodes.Status200OK, data));
