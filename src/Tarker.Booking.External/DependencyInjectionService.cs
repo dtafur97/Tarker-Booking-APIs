@@ -22,7 +22,7 @@ namespace Tarker.Booking.External
                     ValidateAudience = true,
                     ValidateLifetime = true,
                     ValidateIssuerSigningKey = true,
-                    IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(configuration["SecretKeyJwt1"])),
+                    IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(configuration["SecretKeyJwt1"] ?? string.Empty)),
                     ValidIssuer = configuration["IssuerJwt"],
                     ValidAudience = configuration["AudienceJwt"]
                 };
