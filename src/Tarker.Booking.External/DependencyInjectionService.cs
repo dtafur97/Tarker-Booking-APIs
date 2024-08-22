@@ -6,8 +6,10 @@ using Microsoft.IdentityModel.Tokens;
 using System.Text;
 using Tarker.Booking.Application.External.ApplicationInsights;
 using Tarker.Booking.Application.External.GetTokenJwt;
+using Tarker.Booking.Application.External.SendGridEmail;
 using Tarker.Booking.External.AplicationInsights;
 using Tarker.Booking.External.GetTokenJwt;
+using Tarker.Booking.External.SendGridEmail;
 
 namespace Tarker.Booking.External
 {
@@ -15,6 +17,10 @@ namespace Tarker.Booking.External
     {
         public static IServiceCollection AddExternal(this IServiceCollection services, IConfiguration configuration)
         {
+            //Services for SendGrid
+            services.AddSingleton<ISendGridEmailService, SendGridEmailService>();
+
+
             services.AddSingleton<IGetTokenJwtService, GetTokenJwtService>();
 
             services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme).AddJwtBearer(option =>
