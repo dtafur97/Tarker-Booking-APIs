@@ -1,6 +1,6 @@
-# Tarker.Booking
+# API for Tarker Booking
 
-Tarker.Booking is a .NET 8.0 based application for managing bookings, users, and customers. This project is structured into multiple layers to promote separation of concerns and maintainability. Using Clean Architecture and CQRS
+Tarker Booking is a .NET 8.0 based API for managing bookings, users, and customers. This project is structured into multiple layers to promote separation of concerns and maintainability. Using Clean Architecture and CQRS
 
 ## Project Structure
 
@@ -11,40 +11,10 @@ Tarker.Booking is a .NET 8.0 based application for managing bookings, users, and
 - **Tarker.Booking.External**: Contains external integrations and services.
 - **Tarker.Booking.Persistence**: Contains the database context and data access logic.
 
-## Getting Started
-
 ### Prerequisites
 
 - [.NET 8.0 SDK](https://dotnet.microsoft.com/download/dotnet/8.0)
 - [SQL Server](https://www.microsoft.com/en-us/sql-server/sql-server-downloads)
-
-### Installation
-
-1. Clone the repository:
-   git clone https://github.com/your-repo/tarker.booking.git
-   cd tarker.booking
-
-2. Restore the dependencies:
-   dotnet restore
-
-3. Update the connection string in `appsettings.json`:
-	{
-	  "ConnectionStrings": {
-		"SQLConnectionString": "Your SQL Server connection string here"
-	  }
-	}
-
-4. Apply the database migrations:
-   dotnet ef database update --project src/Tarker.Booking.Persistence
-
-
-### Running the Application
-
-1. Navigate to the API project directory:
-   cd src/Tarker.Booking.API
-   
-2. Run the application:
-   dotnet run
 
 ## Project References
 
